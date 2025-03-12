@@ -1,0 +1,117 @@
+/* Importar fuente Cinzel */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Cinzel', serif;
+}
+
+body {
+    background: linear-gradient(135deg, #000000, #102223 );
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenedor principal */
+.welcome-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+/* Tarjeta de bienvenida */
+.welcome-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    text-align: center;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.welcome-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Imagen de perfil */
+.profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 4px solid black;
+}
+
+/* Título */
+h1 {
+    font-size: 28px;
+    color: black;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* Texto */
+p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.continue-btn {
+    padding: 12px 25px;
+    background-color:  #394239 ;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+.continue-btn:hover {
+    background-color: #102223;
+}
+
+/* Botón de cerrar sesión */
+.logout-btn {
+    padding: 12px 25px;
+    background-color: black;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.logout-btn:hover {
+    background-color: #333;
+}
+
+/* Responsive para pantallas más pequeñas */
+@media (max-width: 600px) {
+    .welcome-card {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    p {
+        font-size: 14px;
+    }
+}

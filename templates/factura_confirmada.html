@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura Confirmada</title>
+    <style>
+        /* Importar la fuente Cinzel */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+
+        body {
+            font-family: 'Cinzel', serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2 {
+            color: #333;
+            font-weight: 400;
+        }
+
+        .container {
+            width: 80%;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .factura-info, .totales {
+            margin-bottom: 20px;
+        }
+
+        .factura-info p, .totales p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        table thead {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .totales p strong {
+            font-weight: bold;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #555;
+        }
+
+        .btn:active {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Factura Confirmada</h1>
+        <p><strong>Número de Factura:</strong> {{ id_venta }}</p>
+        <p><strong>Identificador de Venta Personalizado:</strong> {{ id_venta_personalizado }}</p>
+    </div>
+
+    <div class="factura-info">
+        <h2>Cliente</h2>
+        <p><strong>Nombre:</strong> {{ cliente[1] }}</p>
+        <p><strong>Correo:</strong> {{ cliente[3] }}</p>
+
+        <h2>Vendedor</h2>
+        <p><strong>Nombre:</strong> {{ vendedor[1] }}</p>
+    </div>
+
+    <div class="productos">
+        <h2>Productos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Total Parcial</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto['nombre'] }}</td>
+                    <td>{{ producto['cantidad'] }}</td>
+                    <td>{{ producto['precio'] }}</td>
+                    <td>{{ producto['subtotal'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="totales">
+        <h2>Totales</h2>
+        <p><strong>Subtotal:</strong> {{ subtotal }}</p>
+        <p><strong>Descuento:</strong> {{ descuento }}</p>
+        <p><strong>Subtotal con Descuento:</strong> {{ subtotal_con_descuento }}</p>
+        <p><strong>IVA (13%):</strong> {{ iva }}</p>
+        <p><strong>Total a Pagar:</strong> {{ total_con_iva }}</p>
+    </div>
+
+    <a href="javascript:void(0)" class="btn" onclick="window.print()">Imprimir Factura</a>
+</div>
+
+</body>
+</html>

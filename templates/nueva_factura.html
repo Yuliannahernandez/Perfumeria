@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #102223;
+            color: #ffffff;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            padding: 40px;
+            width: 65%;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card-header {
+            background-color: #102223;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-weight: 700;
+            border-radius: 10px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #102223;
+        }
+
+        .form-control:read-only {
+            background-color: #f9f9f9;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: #102223;
+            border-color: #102223;
+            padding: 12px 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0c1717;
+            border-color: #0c1717;
+            transform: scale(1.05);
+        }
+
+        .readonly-fields .form-control {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .title-section {
+            text-align: center;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #102223;
+            margin-bottom: 30px;
+        }
+
+        .form-select,
+        .form-control {
+            font-size: 15px;
+            border-radius: 8px;
+        }
+
+        .form-select {
+            background-color: #f8f9fa;
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .mb-3 {
+            margin-bottom: 25px;
+        }
+
+        .title-section {
+            color: #102223;
+            font-weight: 700;
+        }
+
+        .menu {
+            width: 30%;
+            background-color: #000000;
+            border-radius: 15px;
+            padding: 20px;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu h5 {
+            text-align: center;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+        }
+
+        .menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .menu ul li {
+            margin: 10px 0;
+        }
+
+        .menu ul li a {
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 600;
+            display: block;
+            padding: 10px;
+            background-color: #102223;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu ul li a:hover {
+            background-color: #0c1717;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h3>Generar Factura</h3>
+            </div>
+            <div class="card-body">
+                <div class="title-section">Detalles de la Factura</div>
+
+                <form id="factura-form" method="POST" action="{{ url_for('guardar_factura') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Cliente:</label>
+                        <select class="form-select" name="cliente" required>
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Vendedor:</label>
+                        <select class="form-select" name="vendedor" required>
+                            {% for vendedor in vendedores %}
+                            <option value="{{ vendedor[0] }}">{{ vendedor[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Forma de Pago:</label>
+                        <select class="form-select" name="forma_pago" required>
+                            {% for forma in formas_pago %}
+                            <option value="{{ forma[0] }}">{{ forma[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="productos-container">
+                        <div class="mb-3 product-entry">
+                            <label class="form-label">Producto 1:</label>
+                            <select class="form-select" name="producto_1" required>
+                                {% for producto in productos %}
+                                <option value="{{ producto[0] }}">{{ producto[1] }} - ${{ producto[2] }}</option>
+                                {% endfor %}
+                            </select>
+                            <label class="form-label">Cantidad:</label>
+                            <input type="number" class="form-control" name="cantidad_1" min="1" required>
+                        </div>
+                    </div>
+
+                    <button type="button" id="add-product" class="btn btn-primary w-100 mb-3">Agregar Producto</button>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descuento (%)</label>
+                        <input type="number" class="form-control" name="descuento" value="0" required>
+                    </div>
+
+                    <!-- Campos solo lectura con los valores calculados -->
+                    <div class="readonly-fields">
+                        <div class="mb-3">
+                            <label class="form-label">Subtotal:</label>
+                            <input type="text" class="form-control" name="subtotal" id="subtotal" value="0" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Descuento Aplicado:</label>
+                            <input type="text" class="form-control" name="descuento_aplicado" id="descuento_aplicado"
+                                value="0" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subtotal con Descuento:</label>
+                            <input type="text" class="form-control" name="subtotal_con_descuento"
+                                id="subtotal_con_descuento" value="0" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">IVA (13%):</label>
+                            <input type="text" class="form-control" name="iva" id="iva" value="0" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Total:</label>
+                            <input type="text" class="form-control" name="total" id="total" value="0" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Botón para ver los totales -->
+                    <button type="button" id="ver-totales" class="btn btn-secondary w-100 mb-3">Ver Totales</button>
+
+                    <!-- Botón para guardar la factura -->
+                    <button type="submit" class="btn btn-primary w-100">Guardar Factura</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="menu">
+            <h5>Opciones</h5>
+            <ul>
+                <li><a href="{{ url_for('eliminar_factura') }}">Eliminar</a></li>
+                <li><a href="{{ url_for('nueva_factura') }}">Nueva</a></li>
+                <li><a href="{{ url_for('reimprimir_factura') }}">Reimprimir</a></li>
+                <li><a href="{{ url_for('terminar_factura') }}">Terminar</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let productCount = 1;
+
+        document.getElementById("add-product").addEventListener("click", function () {
+            productCount++;
+
+            let productContainer = document.getElementById("productos-container");
+
+            let newProductHTML = `
+                <div class="mb-3 product-entry">
+                    <label class="form-label">Producto ${productCount}:</label>
+                    <select class="form-select" name="producto_${productCount}" required>
+                        {% for producto in productos %}
+                            <option value="{{ producto[0] }}">{{ producto[1] }} - \${{ producto[2] }}</option>
+                        {% endfor %}
+                    </select>
+                    <label class="form-label">Cantidad:</label>
+                    <input type="number" class="form-control" name="cantidad_${productCount}" min="1" required>
+                </div>
+            `;
+
+            productContainer.insertAdjacentHTML('beforeend', newProductHTML);
+        });
+
+
+        document.getElementById("ver-totales").addEventListener("click", function () {
+            let subtotal_total = 0;
+            let descuento_total = 0;
+            let subtotal_descuento = 0;
+            let iva_total = 0;
+            let total_total = 0;
+
+            for (let i = 1; i <= productCount; i++) {
+                let productoSelect = document.querySelector(`select[name="producto_${i}"]`);
+                let cantidadInput = document.querySelector(`input[name="cantidad_${i}"]`);
+
+                if (productoSelect && cantidadInput) {
+                    let producto_id = productoSelect.value;
+                    let cantidad = parseInt(cantidadInput.value, 10) || 0;
+
+                    if (producto_id && cantidad > 0) {
+                        let precio_unitario = parseFloat(productoSelect.options[productoSelect.selectedIndex].text.split(' - $')[1]);
+
+                        let subtotal = precio_unitario * cantidad;
+                        let descuento = parseFloat(document.querySelector('input[name="descuento"]').value) || 0;
+                        let descuento_aplicado = (subtotal * descuento) / 100;
+                        let subtotal_con_descuento = subtotal - descuento_aplicado;
+                        let iva = subtotal_con_descuento * 0.13;
+                        let total = subtotal_con_descuento + iva;
+
+                        subtotal_total += subtotal;
+                        descuento_total += descuento_aplicado;
+                        subtotal_descuento += subtotal_con_descuento;
+                        iva_total += iva;
+                        total_total += total;
+                    }
+                }
+            }
+
+            // Mostrar los cálculos en los campos de solo lectura
+            document.getElementById("subtotal").value = subtotal_total.toFixed(2);
+            document.getElementById("descuento_aplicado").value = descuento_total.toFixed(2);
+            document.getElementById("subtotal_con_descuento").value = subtotal_descuento.toFixed(2);
+            document.getElementById("iva").value = iva_total.toFixed(2);
+            document.getElementById("total").value = total_total.toFixed(2);
+        });
+
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

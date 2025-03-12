@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cinzel', serif;
+        }
+
+        body {
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-image 1s ease-in-out;
+        }
+
+        /* Flechas de navegación */
+        .flechitas {
+            position: fixed;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .flechitas button {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .flechitas button:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Encabezado con fondo negro */
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background-color: black;
+            z-index: 1;
+            position: relative;
+        }
+
+        .header .title {
+            color: white;
+            font-size: 2em;
+            font-weight: 300;
+            background-color: black;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+        .header .search-bar input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 250px;
+            font-size: 16px;
+            background-color: #f0f0f0;
+        }
+
+        /* Barra de navegación */
+        .navbar {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu>li {
+            position: relative;
+            padding: 10px 15px;
+        }
+
+        .menu>li>a {
+            color: black;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: normal;
+        }
+
+        /* Submenús */
+        .submenu {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            list-style: none;
+            top: 100%;
+            left: 0;
+            min-width: 200px;
+            border-radius: 5px;
+            padding: 10px 0;
+        }
+
+        .submenu li {
+            padding: 10px;
+        }
+
+        .submenu li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .menu li:hover .submenu {
+            display: block;
+        }
+
+        /* Contenedor para el mensaje de bienvenida */
+        .container {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container h1 {
+            font-size: 3em;
+            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Espacio para pie de página */
+        .footer {
+            width: 100%;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="title">ESSENZA PERFUMERÍA</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar...">
+        </div>
+    </div>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <ul class="menu">
+            <li><a href="#">Facturación</a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('nueva_factura') }}">Facturar</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Inventario</a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('inventario.agregar_producto') }}">Ingresar Producto</a></li>
+                    <li><a href="#">Modificar</a></li>
+                    <li><a href="#">Eliminar</a></li>
+                    <li><a href="#">Cambiar estado</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Clientes</a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('cliente.agregar_cliente')}}">Ingresar Nuevo</a></li>
+                    <li><a href="#">Modificar</a></li>
+                    <li><a href="#">Eliminar</a></li>
+                    <li><a href="#">Cambiar estado</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Reportes Generales</a>
+                <ul class="submenu">
+                    <li><a href="#">Reporte de ventas diarias</a></li>
+                    <li><a href="#">Reporte de producto(s)</a></li>
+                    <li><a href="#">Reporte por vendedor(s)</a></li>
+                    <li><a href="#">Por Fecha(s)</a></li>
+                    <li><a href="#">Reporte general por producto y existencia</a></li>
+                    <li><a href="#">Punto de reorden</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Reportes Auditoria</a>
+                <ul class="submenu">
+                    <li><a href="#">Por Usuario(s)</a></li>
+                    <li><a href="#">Por cliente(s)</a></li>
+                    <li><a href="#">Por Vendedor(s)</a></li>
+                    <li><a href="#">Por Factura(s)</a></li>
+                    <li><a href="#">Por fecha(s)</a></li>
+                    <li><a href="#">Todas las opciones</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+
+
+    <!-- Flechas para cambiar imágenes -->
+    <div class="flechitas">
+        <button onclick="anterior()">&#10094;</button>
+        <button onclick="siguiente()">&#10095;</button>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 perfumeria.com. Todos los derechos reservados.</p>
+    </div>
+
+    <script>
+        const imagenes = [
+            '/images/fondo2.jpg',
+            '/images/fondo7.jpg',
+            '/images/fondo8.jpg'
+        ];
+
+        let index = 0;
+
+        function cambiarFondo() {
+            document.body.style.backgroundImage = `url('${imagenes[index]}')`;
+        }
+
+        function siguiente() {
+            index = (index + 1) % imagenes.length;
+            cambiarFondo();
+        }
+
+        function anterior() {
+            index = (index - 1 + imagenes.length) % imagenes.length;
+            cambiarFondo();
+        }
+
+        setInterval(siguiente, 5000); // Cambio automático cada 5 segundos
+        cambiarFondo(); // Cargar la primera imagen al inicio
+    </script>
+
+</body>
+
+</html>

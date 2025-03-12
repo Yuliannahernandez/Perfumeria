@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Cliente</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@300&display=swap');
+        
+        body {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(135deg, #102223, #2a3e44); /* Fondo elegante con tonos verdes y grises */
+            color: white;
+            text-align: center;
+            padding: 50px 0;
+            margin: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            color: #253236; /* Color oscuro para el texto dentro del contenedor */
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 50px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h2 {
+            font-weight: 300;
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #2a3e44;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            display: inline-block;
+            text-align: left;
+        }
+
+        input, select, button {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+        }
+
+        input, select {
+            width: 100%;
+        }
+
+        button {
+            background-color: #2a3e44; /* Fondo oscuro para el botón */
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #1a2d34; /* Cambio de color a un tono más oscuro */
+            transition: background-color 0.3s ease;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .message.success {
+            color: #4cae4c; /* Verde suave para mensajes de éxito */
+        }
+        
+        .message.error {
+            color: #d9534f; /* Rojo suave para errores */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Agregar Cliente</h2>
+        <form method="POST">
+            <label for="nombre_completo">Nombre Completo:</label>
+            <input type="text" id="nombre_completo" name="nombre_completo" required>
+            
+            <label for="contacto">Contacto:</label>
+            <input type="text" id="contacto" name="contacto" required>
+            
+            <label for="correo">Correo Electrónico:</label>
+            <input type="email" id="correo" name="correo" required>
+            
+            <label for="tipo_cliente">Tipo de Cliente:</label>
+            <select id="tipo_cliente" name="tipo_cliente" required>
+                {% for tipo in tipos_clientes %}
+                    <option value="{{ tipo.IDTipo }}">{{ tipo.Descripcion }}</option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit">Agregar Cliente</button>
+        </form>
+        {% if message %}
+            <p class="message {% if 'exitosamente' in message %}success{% else %}error{% endif %}">{{ message }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
+

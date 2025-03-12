@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminar Factura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #102223;
+            color: #ffffff;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            padding: 40px;
+            width: 60%;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card-header {
+            background-color: #102223;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-weight: 700;
+            border-radius: 10px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #102223;
+        }
+
+        .btn-primary, .btn-danger {
+            background-color: #102223;
+            border-color: #102223;
+            padding: 12px 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-danger:hover {
+            background-color: #0c1717;
+            border-color: #0c1717;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .title-section {
+            text-align: center;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #102223;
+            margin-bottom: 30px;
+        }
+
+        .mb-3 {
+            margin-bottom: 25px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3>Terminar Factura</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-center" style="font-size: 1.2em;">¿Está seguro de que desea terminar la factura y regresar a la página principal?</p>
+
+            <form method="POST" action="{{ url_for('terminar_factura') }}">
+                <button type="submit" class="btn btn-danger w-100">Terminar y Regresar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>
+
