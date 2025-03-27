@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Clientes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cinzel', serif;
+            background-color: #fff;
+            color: #102223;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background-color: #102223;
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        p {
+            font-weight: 400;
+            font-size: 1.2em;
+        }
+        .search-form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-form input[type="text"] {
+            padding: 12px;
+            font-size: 1.1em;
+            width: 300px;
+            margin-right: 10px;
+            border: 2px solid #102223;
+            border-radius: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-form input[type="text"]:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+        .search-form button {
+            padding: 12px 20px;
+            font-size: 1.1em;
+            background-color: #102223;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .search-form button:hover {
+            background-color: #4CAF50;
+        }
+        .back-button {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            background-color: #102223;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            text-align: center;
+            width: 200px;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #4CAF50;
+        }
+        table {
+            width: 80%;
+            margin: 50px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            font-size: 1.1em;
+        }
+        th {
+            background-color: #102223;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #e2e2e2;
+        }
+        a {
+            color: #102223;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        td a {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Clientes</h1>
+        <p>{{ message }}</p>
+    </header>
+
+    <!-- Formulario para buscar por IDCliente -->
+    <div class="search-form">
+        <form method="GET">
+            <input type="text" name="search_id" placeholder="Buscar por IDCliente" value="{{ search_id }}">
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>IDCliente</th>
+                <th>Nombre Completo</th>
+                <th>Contacto</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.IDCliente }}</td>
+                    <td>{{ cliente.NombreCompleto }}</td>
+                    <td>{{ cliente.Contacto }}</td>
+                    <td>{{ cliente.Correo }}</td>
+                    <td>{{ cliente.Estado }}</td>
+                    <td>
+                        <a href="{{ url_for('cliente.modificar_cliente', id_cliente=cliente.IDCliente) }}">Modificar</a> | 
+                        <a href="{{ url_for('cliente.eliminar_cliente', id_cliente=cliente.IDCliente) }}">Eliminar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Botón para volver a agregar clientes -->
+    <a href="{{ url_for('cliente.agregar_cliente') }}">
+        <button class="back-button">Volver</button>
+    </a>
+
+</body>
+</html>

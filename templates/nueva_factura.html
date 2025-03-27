@@ -165,20 +165,20 @@
 
                 <form id="factura-form" method="POST" action="{{ url_for('guardar_factura') }}">
                     <div class="mb-3">
-                        <label class="form-label">Cliente:</label>
-                        <select class="form-select" name="cliente" required>
-                            {% for cliente in clientes %}
-                            <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
-                            {% endfor %}
+                        <label class="form-label">Buscar Cliente (Contacto):</label>
+                        <input type="text" class="form-control" id="buscar-cliente" placeholder="Ingrese contacto...">
+                        <select class="form-select" name="cliente" id="cliente-select" required>
+                            <option value="">Seleccione un cliente</option>
                         </select>
                     </div>
 
+                    <!-- Buscar Vendedor -->
                     <div class="mb-3">
-                        <label class="form-label">Vendedor:</label>
-                        <select class="form-select" name="vendedor" required>
-                            {% for vendedor in vendedores %}
-                            <option value="{{ vendedor[0] }}">{{ vendedor[1] }}</option>
-                            {% endfor %}
+                        <label class="form-label">Buscar Vendedor (ID):</label>
+                        <input type="text" class="form-control" id="buscar-vendedor"
+                            placeholder="Ingrese ID del vendedor...">
+                        <select class="form-select" name="vendedor" id="vendedor-select" required>
+                            <option value="">Seleccione un vendedor</option>
                         </select>
                     </div>
 
@@ -193,16 +193,17 @@
 
                     <div id="productos-container">
                         <div class="mb-3 product-entry">
-                            <label class="form-label">Producto 1:</label>
-                            <select class="form-select" name="producto_1" required>
-                                {% for producto in productos %}
-                                <option value="{{ producto[0] }}">{{ producto[1] }} - ${{ producto[2] }}</option>
-                                {% endfor %}
+                            <label class="form-label">Producto:</label>
+                            <input type="text" class="form-control buscar-producto" placeholder="Buscar producto...">
+                            <select class="form-select producto-select" name="producto_1" required>
+                                <option value="">Seleccione un producto</option>
                             </select>
+
                             <label class="form-label">Cantidad:</label>
                             <input type="number" class="form-control" name="cantidad_1" min="1" required>
                         </div>
                     </div>
+
 
                     <button type="button" id="add-product" class="btn btn-primary w-100 mb-3">Agregar Producto</button>
 
@@ -211,38 +212,8 @@
                         <input type="number" class="form-control" name="descuento" value="0" required>
                     </div>
 
-                    <!-- Campos solo lectura con los valores calculados -->
-                    <div class="readonly-fields">
-                        <div class="mb-3">
-                            <label class="form-label">Subtotal:</label>
-                            <input type="text" class="form-control" name="subtotal" id="subtotal" value="0" readonly>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Descuento Aplicado:</label>
-                            <input type="text" class="form-control" name="descuento_aplicado" id="descuento_aplicado"
-                                value="0" readonly>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Subtotal con Descuento:</label>
-                            <input type="text" class="form-control" name="subtotal_con_descuento"
-                                id="subtotal_con_descuento" value="0" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">IVA (13%):</label>
-                            <input type="text" class="form-control" name="iva" id="iva" value="0" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Total:</label>
-                            <input type="text" class="form-control" name="total" id="total" value="0" readonly>
-                        </div>
-                    </div>
-
-                    <!-- Botón para ver los totales -->
-                    <button type="button" id="ver-totales" class="btn btn-secondary w-100 mb-3">Ver Totales</button>
 
                     <!-- Botón para guardar la factura -->
                     <button type="submit" class="btn btn-primary w-100">Guardar Factura</button>
@@ -254,6 +225,7 @@
             <h5>Opciones</h5>
             <ul>
                 <li><a href="{{ url_for('eliminar_factura') }}">Eliminar</a></li>
+                <li><a href="{{ url_for('ver_facturas') }}">Ver Facturas</a></li>
                 <li><a href="{{ url_for('nueva_factura') }}">Nueva</a></li>
                 <li><a href="{{ url_for('reimprimir_factura') }}">Reimprimir</a></li>
                 <li><a href="{{ url_for('terminar_factura') }}">Terminar</a></li>
@@ -262,37 +234,112 @@
     </div>
 
     <script>
-        let productCount = 1;
 
-        document.getElementById("add-product").addEventListener("click", function () {
-            productCount++;
+        document.addEventListener("DOMContentLoaded", function () {
+            let productCount = 1;
 
-            let productContainer = document.getElementById("productos-container");
+            document.getElementById("buscar-cliente").addEventListener("input", function () {
+                let termino = this.value.trim();
+                if (termino.length > 2) {
+                    fetch(`/buscar_cliente?contacto=${termino}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let clienteSelect = document.getElementById("cliente-select");
+                            clienteSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
+                            data.forEach(cliente => {
+                                let option = document.createElement("option");
+                                option.value = cliente.id;
+                                option.textContent = cliente.nombre + " - " + cliente.contacto;
+                                clienteSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error("Error en la búsqueda de clientes:", error));
+                }
+            });
 
-            let newProductHTML = `
-                <div class="mb-3 product-entry">
-                    <label class="form-label">Producto ${productCount}:</label>
-                    <select class="form-select" name="producto_${productCount}" required>
-                        {% for producto in productos %}
-                            <option value="{{ producto[0] }}">{{ producto[1] }} - \${{ producto[2] }}</option>
-                        {% endfor %}
-                    </select>
-                    <label class="form-label">Cantidad:</label>
-                    <input type="number" class="form-control" name="cantidad_${productCount}" min="1" required>
-                </div>
-            `;
+            // Búsqueda de Vendedor por IDVendedor
+            document.getElementById("buscar-vendedor").addEventListener("input", function () {
+                let termino = this.value.trim();
+                if (termino.length > 0) {
+                    fetch(`/buscar_vendedor?id=${termino}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let vendedorSelect = document.getElementById("vendedor-select");
+                            vendedorSelect.innerHTML = '<option value="">Seleccione un vendedor</option>';
+                            data.forEach(vendedor => {
+                                let option = document.createElement("option");
+                                option.value = vendedor.id;
+                                option.textContent = vendedor.nombre + " (ID: " + vendedor.id + ")";
+                                vendedorSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error("Error en la búsqueda de vendedores:", error));
+                }
+            });
 
-            productContainer.insertAdjacentHTML('beforeend', newProductHTML);
+            function enableProductSearch(inputField, selectField) {
+                inputField.addEventListener("input", function () {
+                    let termino = this.value.trim();
+
+                    if (termino.length > 2) {  // Buscar solo si hay más de 2 caracteres
+                        fetch(`/buscar_productos?q=${termino}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                selectField.innerHTML = '<option value="">Seleccione un producto</option>';
+
+                                data.forEach(producto => {
+                                    let option = document.createElement("option");
+                                    option.value = producto.id;
+                                    option.textContent = producto.text;
+                                    selectField.appendChild(option);
+                                });
+                            })
+                            .catch(error => console.error("Error en la búsqueda:", error));
+                    }
+                });
+            }
+
+            document.getElementById("add-product").addEventListener("click", function () {
+                productCount++;
+
+                let productContainer = document.getElementById("productos-container");
+
+                let newProductHTML = `
+            <div class="mb-3 product-entry">
+                <label class="form-label">Producto ${productCount}:</label>
+                <input type="text" class="form-control buscar-producto" placeholder="Buscar producto...">
+                <select class="form-select producto-select" name="producto_${productCount}" required>
+                    <option value="">Seleccione un producto</option>
+                </select>
+
+                <label class="form-label">Cantidad:</label>
+                <input type="number" class="form-control" name="cantidad_${productCount}" min="1" required>
+            </div>
+        `;
+
+                productContainer.insertAdjacentHTML('beforeend', newProductHTML);
+
+                // Obtener los nuevos elementos y asignar la función de búsqueda
+                let newEntry = productContainer.querySelector(`.product-entry:last-child`);
+                let newInputField = newEntry.querySelector(".buscar-producto");
+                let newSelectField = newEntry.querySelector(".producto-select");
+
+                enableProductSearch(newInputField, newSelectField);
+            });
+
+            // Inicializar la búsqueda en el primer producto
+            enableProductSearch(document.querySelector(".buscar-producto"), document.querySelector(".producto-select"));
         });
 
 
-        document.getElementById("ver-totales").addEventListener("click", function () {
+        function updateTotals() {
             let subtotal_total = 0;
             let descuento_total = 0;
             let subtotal_descuento = 0;
             let iva_total = 0;
             let total_total = 0;
 
+            // Recorre todos los productos agregados
             for (let i = 1; i <= productCount; i++) {
                 let productoSelect = document.querySelector(`select[name="producto_${i}"]`);
                 let cantidadInput = document.querySelector(`input[name="cantidad_${i}"]`);
@@ -302,7 +349,8 @@
                     let cantidad = parseInt(cantidadInput.value, 10) || 0;
 
                     if (producto_id && cantidad > 0) {
-                        let precio_unitario = parseFloat(productoSelect.options[productoSelect.selectedIndex].text.split(' - $')[1]);
+                        let precio_texto = productoSelect.options[productoSelect.selectedIndex].text;
+                        let precio_unitario = parseFloat(precio_texto.split(' - $')[1]);
 
                         let subtotal = precio_unitario * cantidad;
                         let descuento = parseFloat(document.querySelector('input[name="descuento"]').value) || 0;
@@ -320,13 +368,20 @@
                 }
             }
 
-            // Mostrar los cálculos en los campos de solo lectura
+            // Actualizar los campos de solo lectura
             document.getElementById("subtotal").value = subtotal_total.toFixed(2);
             document.getElementById("descuento_aplicado").value = descuento_total.toFixed(2);
             document.getElementById("subtotal_con_descuento").value = subtotal_descuento.toFixed(2);
             document.getElementById("iva").value = iva_total.toFixed(2);
             document.getElementById("total").value = total_total.toFixed(2);
-        });
+        }
+
+        // Monitorear cambios en los productos y cantidades para actualizar los totales
+        document.getElementById("factura-form").addEventListener("change", updateTotals);
+
+
+
+
 
     </script>
 

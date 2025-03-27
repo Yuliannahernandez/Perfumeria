@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Cliente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cinzel', serif;
+            background-color: #fff;
+            color: #102223;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-weight: 400;
+            font-size: 1.2em;
+        }
+        form {
+            width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #102223;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+        }
+        label {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 1em;
+            border: 1px solid #102223;
+            border-radius: 4px;
+        }
+        input[type="text"], input[type="email"], select {
+            background-color: #fff;
+        }
+        button {
+            background-color: #102223;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        h2 {
+            text-align: center;
+            font-weight: 400;
+            font-size: 1.5em;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Modificar Cliente</h1>
+        <p>{{ message }}</p>
+    </header>
+
+    <form method="POST">
+        <label for="nombre_completo">Nombre Completo:</label>
+        <input type="text" name="nombre_completo" value="{{ cliente.NombreCompleto }}" required><br>
+
+        <label for="contacto">Contacto:</label>
+        <input type="text" name="contacto" value="{{ cliente.Contacto }}" required><br>
+
+        <label for="correo">Correo:</label>
+        <input type="email" name="correo" value="{{ cliente.Correo }}" required><br>
+
+        <label for="tipo_cliente">Tipo de Cliente:</label>
+        <select name="tipo_cliente" required>
+            {% for tipo in tipos_clientes %}
+                <option value="{{ tipo.IDTipo }}" {% if tipo.IDTipo == cliente.IDTipo %}selected{% endif %}>
+                    {{ tipo.Descripcion }}
+                </option>
+            {% endfor %}
+        </select><br>
+
+        <label for="estado">Estado:</label>
+        <select name="estado" required>
+            <option value="Activo" {% if cliente.Estado == 'Activo' %}selected{% endif %}>Activo</option>
+            <option value="Inactivo" {% if cliente.Estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+        </select><br>
+
+        <button type="submit">Modificar Cliente</button>
+    </form>
+
+</body>
+</html>
+

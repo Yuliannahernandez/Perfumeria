@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Productos</title>
-
-    <!-- Fuentes y estilo personalizado -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@200;400&display=swap" rel="stylesheet">
+    <title>Productos por Categoría</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@100;200;400&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Cinzel', serif;
@@ -20,30 +18,95 @@
             text-align: center;
             margin-top: 50px;
             font-size: 2.5em;
+            font-weight: 100;
+        }
+
+        .search-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .search-input {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            border: 1px solid #bdc3c7;
+            background-color: #34495e;
+            color: white;
+            width: 40%;
+            max-width: 500px;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            border-bottom: 2px solid #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-family: 'Cinzel', serif;
+            font-weight: 400;  /* Usamos el peso 400 de Cinzel para las pestañas */
+            margin-right: 20px;
+            background-color: #102223; /* Color principal */
+            color: white;
+            border: none;
+            border-radius: 25px 25px 0 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+
+        .tab:hover {
+            background-color: #152d2f;
+            transform: translateY(-3px);
+        }
+
+        .tab-content {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         table {
             width: 90%;
             margin: 30px auto;
             border-collapse: collapse;
-            border: 2px solid #ecf0f1;
-            background-color: white;
-            color: black;
+            background-color: #ecf0f1;
+            color: #34495e;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 15px;
             text-align: center;
-            font-weight: 200; /* Cinzel delgado */
+            font-weight: 300;
         }
 
         th {
-            background-color: #092f3593;
+            background-color: #102223;
             color: white;
+            font-size: 1.1em;
         }
 
         td {
-            background-color: #ffffff;
+            background-color: #fff;
+            font-size: 1em;
+            border-bottom: 1px solid #bdc3c7;
         }
 
         td.subrayado {
@@ -52,85 +115,96 @@
         }
 
         button {
-            background-color: #053335de; /* Mismo color que el encabezado */
+            background-color: #102223;
             color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
             cursor: pointer;
-            font-size: 1em;
-            border-radius: 5px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #2c3e50;
+            background-color: #102223;
         }
 
-        a {
-            color: #ecf0f1;
-            text-decoration: none;
-            font-size: 1.2em;
-            padding: 10px 20px;
-            background-color: #082b329b;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: block;
-            text-align: center;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        a:hover {
-            background-color: #2980b9;
-        }
-
-        .message {
-            background-color: #093132d0;
-            padding: 15px;
-            text-align: center;
-            border-radius: 5px;
-            font-size: 1.2em;
-            margin-top: 20px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Productos en Inventario</h1>
+    <h1>Productos por Categoría</h1>
 
-    {% if message %}
-        <div class="message">{{ message }}</div>
-    {% endif %}
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+        <form method="GET" action="{{ url_for('inventario.ver_producto') }}">
+            <input type="text" class="search-input" name="search_id" placeholder="Buscar por ID o nombre" value="{{ search_id }}">
+        </form>
+    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Existencia Estantes</th>
-                <th>Existencia Bodega</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for producto in productos %}
-                <tr {% if producto[4] <= 10 or producto[5] <= 10 %}style="background-color: #f39c12;"{% endif %}>
-                    <td>{{ producto[1] }}</td>
-                    <td>{{ producto[2] }}</td>
-                    <td>{{ producto[3] }}</td>
-                    <td class="{% if producto[4] <= 10 %}subrayado{% endif %}">{{ producto[4] }}</td>
-                    <td class="{% if producto[5] <= 10 %}subrayado{% endif %}">{{ producto[5] }}</td>
-                    <td>
-                        <a href="{{ url_for('inventario.modificar_producto', id=producto[0]) }}">Modificar</a> |
-                        <form action="{{ url_for('inventario.eliminar_producto', id=producto[0]) }}" method="POST" style="display:inline;">
-                            <button type="submit">Eliminar Producto</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="tabs">
+        {% for tipo, productos_tipo in productos_por_tipo.items() %}
+            <button class="tab" onclick="showTab('{{ tipo }}')">{{ tipo }}</button>
+        {% endfor %}
+    </div>
 
-    <a href="{{ url_for('inventario.agregar_producto') }}">Agregar Producto</a>
+    {% for tipo, productos_tipo in productos_por_tipo.items() %}
+        <div id="{{ tipo }}" class="tab-content">
+            <h2 style="text-align: center; font-size: 2em; font-weight: 200;">{{ tipo }}</h2> <!-- Títulos más ligeros -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>IDProducto</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Existencia Estantes</th>
+                        <th>Existencia Bodega</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos_tipo %}
+                        <tr {% if producto.existencia_estantes <= 10 or producto.existencia_bodega <= 10 %}style="background-color: #f39c12;"{% endif %}>
+                            <td>{{ producto.id_producto }}</td>
+                            <td>{{ producto.nombre }}</td>
+                            <td>{{ producto.descripcion }}</td>
+                            <td>{{ producto.precio }}</td>
+                            <td class="{% if producto.existencia_estantes <= 10 %}subrayado{% endif %}">{{ producto.existencia_estantes }}</td>
+                            <td class="{% if producto.existencia_bodega <= 10 %}subrayado{% endif %}">{{ producto.existencia_bodega }}</td>
+                            <td>
+                                <a href="{{ url_for('inventario.modificar_producto', id=producto.id_producto) }}" style="color: #2980b9; text-decoration: none;">Modificar</a> |
+                                <form action="{{ url_for('inventario.eliminar_producto', id=producto.id_producto) }}" method="POST" style="display:inline;">
+                                    <button type="submit">Eliminar Producto</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+
+    <script>
+        function showTab(tabName) {
+            var tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+
+            var activeTab = document.getElementById(tabName);
+            activeTab.classList.add('active');
+        }
+
+        // Mostrar la primera pestaña por defecto
+        document.querySelector('.tab').click();
+    </script>
 </body>
 </html>

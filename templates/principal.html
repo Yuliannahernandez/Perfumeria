@@ -180,17 +180,19 @@
             <li><a href="#">Inventario</a>
                 <ul class="submenu">
                     <li><a href="{{ url_for('inventario.agregar_producto') }}">Ingresar Producto</a></li>
-                    <li><a href="#">Modificar</a></li>
-                    <li><a href="#">Eliminar</a></li>
-                    <li><a href="#">Cambiar estado</a></li>
+                   
                 </ul>
             </li>
             <li><a href="#">Clientes</a>
                 <ul class="submenu">
                     <li><a href="{{ url_for('cliente.agregar_cliente')}}">Ingresar Nuevo</a></li>
-                    <li><a href="#">Modificar</a></li>
-                    <li><a href="#">Eliminar</a></li>
-                    <li><a href="#">Cambiar estado</a></li>
+
+                </ul>
+            </li>
+            <li><a href="#">Vendedores</a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('vendedor.agregar_vendedor')}}">Ingresar Nuevo</a></li>
+
                 </ul>
             </li>
             <li><a href="#">Reportes Generales</a>

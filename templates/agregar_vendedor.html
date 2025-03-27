@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agregar Producto</title>
+    <title>Agregar Vendedor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@300;400&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #ffffff;
+            background-color: #f8f8f8;
             font-family: 'Cinzel Decorative', serif;
             color: #333;
             height: 100vh;
@@ -40,7 +40,7 @@
         }
 
         .container {
-            background-color: #f8f8f8;
+            background-color: #fff;
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -138,11 +138,6 @@
             padding: 15px;
             margin-bottom: 20px;
         }
-
-        .container-fluid {
-            margin-top: 20px;
-            flex-grow: 1;
-        }
     </style>
 </head>
 
@@ -151,96 +146,45 @@
     <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Gestión de Inventario</a>
+            <a class="navbar-brand" href="#">Gestión de Vendedores</a>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('inventario.ver_producto') }}">Ver Producto</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('vendedor.ver_vendedores') }}">Ver Vendedores</a></li>
             </ul>
         </div>
     </nav>
 
+    <!-- Formulario de agregar vendedor -->
     <div class="container">
-        <h2>Agregar Nuevo Producto</h2>
-
-        {% if message %}
-        <div class="alert-info">{{ message }}</div>
-        {% endif %}
-
-        <!-- Formulario para agregar un producto -->
+        <h2>Agregar Vendedor</h2>
         <form method="POST">
             <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                <label for="nombre_completo" class="form-label">Nombre Completo:</label>
+                <input type="text" name="nombre_completo" id="nombre_completo" class="form-control" required><br>
             </div>
-            <div class="mb-3">
-                <label for="descripcion" class="form-label">Descripción</label>
-                <input type="text" class="form-control" id="descripcion" name="descripcion" required>
-            </div>
-            <div class="mb-3">
-                <label for="peso_ml" class="form-label">Peso (ml)</label>
-                <input type="number" class="form-control" id="peso_ml" name="peso_ml" required>
-            </div>
-            <div class="mb-3">
-                <label for="marca" class="form-label">Marca</label>
-                <input type="text" class="form-control" id="marca" name="marca" required>
-            </div>
-            <div class="mb-3">
-                <label for="concentracion" class="form-label">Concentración</label>
-                <input type="text" class="form-control" id="concentracion" name="concentracion" required>
-            </div>
-            <div class="mb-3">
-                <label for="precio" class="form-label">Precio</label>
-                <input type="number" class="form-control" id="precio" name="precio" required>
-            </div>
-            <div class="mb-3">
-                <label for="tipo_producto_id" class="form-label">Tipo de Producto:</label>
-                <select name="tipo_producto_id" id="tipo_producto_id" class="form-control" required>
-                    {% for tipo in tipos_productos %}
-                    <option value="{{ tipo[0] }}">{{ tipo[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="existencia_estantes" class="form-label">Existencia en Estantes</label>
-                <input type="number" class="form-control" id="existencia_estantes" name="existencia_estantes" required>
-            </div>
-            <div class="mb-3">
-                <label for="existencia_bodega" class="form-label">Existencia en Bodega</label>
-                <input type="number" class="form-control" id="existencia_bodega" name="existencia_bodega" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar Producto</button>
-        </form>
 
-        <!-- Tabla de productos en inventario -->
-        <h3>Inventario</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID Producto</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Existencia Estantes</th>
-                    <th>Existencia Bodega</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                <tr>
-                    <td>{{ producto[0] }}</td>
-                    <td>{{ producto[1] }}</td>
-                    <td>{{ producto[2] }}</td>
-                    <td>{{ producto[3] }}</td>
-                    <td>{{ producto[4] }}</td>
-                    <td>{{ producto[5] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <div class="mb-3">
+                <label for="celular" class="form-label">Celular:</label>
+                <input type="text" name="celular" id="celular" class="form-control" required><br>
+            </div>
+
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo:</label>
+                <input type="text" name="correo" id="correo" class="form-control" required><br>
+            </div>
+
+            <div class="mb-3">
+                <label for="cuenta_vendedor" class="form-label">Cuenta Vendedor:</label>
+                <input type="text" name="cuenta_vendedor" id="cuenta_vendedor" class="form-control" required><br>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Agregar Vendedor</button>
+        </form>
     </div>
 
-    <!-- Scripts necesarios para el funcionamiento de Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <!-- Mensaje de resultado de acción -->
+    <p>{{ message }}</p>
+
+
 </body>
 
 </html>
