@@ -82,34 +82,61 @@ def agregar_producto():
 
     return render_template('agregar_producto.html', tipos_productos=tipos_productos, productos=productos, message=message)
 
-@inventario_bp.route('/ver_producto')
+@inventario_bp.route('/ver_producto', methods=['GET', 'POST'])
 def ver_producto():
     message = ""
-    productos = []  # Para almacenar los productos del inventario
-    
+    productos_por_tipo = {}  # Para almacenar los productos agrupados por tipo
+    search_id = request.args.get('search_id', '').strip()
+
     from app import get_db_connection  # Importar la función de conexión a la base de datos
 
     # Definir el username y password para la conexión a la base de datos
     username = "usuario"
     password = "contraseña"
 
+    # Si el método es POST, obtener el valor de búsqueda del formulario
+    if request.method == 'POST':
+        search_id = request.form['search_id']
+    
     try:
         # Conexión a la base de datos
         conn = get_db_connection(username, password)
         cursor = conn.cursor()
 
-        # Consultamos todos los productos en inventario
-        cursor.execute("""
-            SELECT id_producto, nombre, descripcion, precio, existencia_estantes, existencia_bodega
-            FROM Productos
-        """)
+        # Construimos la consulta SQL según si se especificó un search_id
+        if search_id:
+            cursor.execute("""
+                SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.existencia_estantes, p.existencia_bodega, tp.nombre AS tipo_producto
+                FROM Productos p
+                JOIN tipos_productos tp ON p.tipo_producto_id = tp.id_tipo_producto
+                LEFT JOIN productos_inactivos pi ON p.id_producto = pi.id_producto
+                WHERE pi.id_producto IS NULL AND (p.id_producto LIKE ? OR p.nombre LIKE ?)
+            """, ('%' + search_id + '%', '%' + search_id + '%'))
+        else:
+            # Si no hay búsqueda, mostramos todos los productos
+            cursor.execute("""
+                SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.existencia_estantes, p.existencia_bodega, tp.nombre AS tipo_producto
+                FROM Productos p
+                JOIN tipos_productos tp ON p.tipo_producto_id = tp.id_tipo_producto
+                LEFT JOIN productos_inactivos pi ON p.id_producto = pi.id_producto
+                WHERE pi.id_producto IS NULL
+            """)
+
         productos = cursor.fetchall()
 
-        # Agregamos el símbolo de colones a los precios
-        for i, producto in enumerate(productos):
-            precio_colones = producto[3]
-            productos[i] = list(producto)
-            productos[i][3] = "₡{:,.2f}".format(precio_colones)
+        # Agrupar los productos por tipo
+        for producto in productos:
+            tipo_producto = producto[6]  # Tipo del producto (nombre de tipo_producto)
+            if tipo_producto not in productos_por_tipo:
+                productos_por_tipo[tipo_producto] = []
+            productos_por_tipo[tipo_producto].append({
+                'id_producto': producto[0],
+                'nombre': producto[1],
+                'descripcion': producto[2],
+                'precio': "₡{:,.2f}".format(producto[3]),
+                'existencia_estantes': producto[4],
+                'existencia_bodega': producto[5]
+            })
     
     except Exception as e:
         message = f"Error al obtener productos: {str(e)}"
@@ -117,7 +144,9 @@ def ver_producto():
         if conn:
             conn.close()
 
-    return render_template('ver_producto.html', productos=productos, message=message)
+    return render_template('ver_producto.html', productos_por_tipo=productos_por_tipo, message=message, search_id=search_id)
+
+
 
 @inventario_bp.route('/modificar_producto/<int:id>', methods=['GET', 'POST'])
 def modificar_producto(id):
@@ -195,7 +224,7 @@ def eliminar_producto(id):
         conn = get_db_connection(username, password)
         cursor = conn.cursor()
 
-        # Comprobar si el producto existe antes de eliminarlo
+        # Comprobar si el producto existe antes de marcarlo como inactivo
         cursor.execute("SELECT * FROM Productos WHERE id_producto = ?", (id,))
         producto = cursor.fetchone()
 
@@ -203,28 +232,23 @@ def eliminar_producto(id):
             message = "Producto no encontrado."
             return redirect(url_for('inventario.ver_productos'))
 
-        # Eliminar las filas en Detalle_Ventas que referencian este producto
-        cursor.execute("DELETE FROM Detalle_Ventas WHERE IDProducto = ?", (id,))
-        conn.commit()
+        # Verificar si el producto ya está inactivo
+        cursor.execute("SELECT * FROM productos_inactivos WHERE id_producto = ?", (id,))
+        inactivo = cursor.fetchone()
 
-        # Ahora eliminamos el producto
-        cursor.execute("DELETE FROM Productos WHERE id_producto = ?", (id,))
-        conn.commit()
-
-        # Verificamos si el producto fue eliminado
-        cursor.execute("SELECT * FROM Productos WHERE id_producto = ?", (id,))
-        producto = cursor.fetchone()
-
-        if producto:
-            message = "No se pudo eliminar el producto."
+        if inactivo:
+            message = "El producto ya está inactivo."
         else:
-            message = "Producto eliminado correctamente."
+            # Insertar el producto en la tabla de productos inactivos
+            cursor.execute("INSERT INTO productos_inactivos (id_producto) VALUES (?)", (id,))
+            conn.commit()
+            message = "Producto marcado como inactivo."
 
     except Exception as e:
-        message = f"Error al eliminar producto: {str(e)}"
+        message = f"Error al marcar producto como inactivo: {str(e)}"
     finally:
         if conn:
             conn.close()
 
-    # Redirigir a la página de productos después de la eliminación
+    # Redirigir a la página de productos después de marcarlo como inactivo
     return redirect(url_for('inventario.ver_producto', message=message))

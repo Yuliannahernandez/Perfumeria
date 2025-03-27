@@ -8,31 +8,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@300;400&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #102223, #1e3c3ec9);
+            background: #f7f7f7;
             font-family: 'Cinzel Decorative', serif;
-            color: #fff;
+            color: #333;
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            background-size: 400% 400%;
-            animation: gradientAnimation 6s ease infinite;
             margin: 0;
-        }
-
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
         }
 
         .navbar {
@@ -55,35 +39,33 @@
         }
 
         .container {
-            background-color: #000;
+            background-color: #fff;
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 900px;
             margin-top: 20px;
-            flex-grow: 1;
         }
 
         h2 {
-            font-size: 2.8rem;
-            color: #ffffff;
+            font-size: 2.6rem;
+            color: #333;
             text-align: center;
             margin-bottom: 30px;
-            letter-spacing: 2px;
             font-weight: 400;
         }
 
         .form-label {
             font-weight: 300;
-            color: #fff;
+            color: #333;
             font-size: 1.1rem;
         }
 
         .form-control {
-            background-color: #ffffff;
-            color: #000;
-            border: none;
+            background-color: #f8f8f8;
+            color: #333;
+            border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 1rem;
             margin-bottom: 15px;
@@ -91,7 +73,7 @@
 
         .form-control:focus {
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-            border: none;
+            border-color: #102223;
         }
 
         .btn-primary {
@@ -113,7 +95,6 @@
 
         .container-fluid {
             margin-top: 20px;
-            flex-grow: 1;
         }
     </style>
 </head>
@@ -125,9 +106,7 @@
             <a class="navbar-brand" href="#">Gestión de Inventario</a>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('inventario.ver_producto') }}">Ver Producto</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Modificar Producto</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Eliminar Producto</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Estado Producto</a></li>
+
             </ul>
         </div>
     </nav>

@@ -1,11 +1,11 @@
-from flask import Flask, request, redirect, session, render_template, flash, send_from_directory, url_for
+from flask import Flask, jsonify, request, redirect, session, render_template, flash, send_from_directory, url_for
 import pyodbc
 import os
 from dotenv import load_dotenv
 from decimal import Decimal
 from cliente import clientes_bp 
 from inventario import inventario_bp
-
+from vendedor import vendedores_bp
 
 load_dotenv()
 
@@ -118,7 +118,17 @@ def nueva_factura():
     cursor.execute("SELECT IDVendedor, NombreVendedor FROM Vendedores WHERE Estado = 'Activo'")
     vendedores = cursor.fetchall()
 
-    cursor.execute("SELECT id_producto, nombre, precio FROM productos WHERE existencia_estantes > 0")
+    # 🔹 EXCLUIR productos inactivos
+    cursor.execute("""
+    SELECT id_producto, nombre, precio 
+    FROM productos p
+    WHERE existencia_estantes > 0 
+    AND NOT EXISTS (
+        SELECT 1 FROM productos_inactivos pi WHERE pi.id_producto = p.id_producto
+    )
+""")
+
+
     productos = cursor.fetchall()
 
     cursor.execute("SELECT id_pago, descripcion FROM formas_pago")
@@ -133,6 +143,7 @@ def nueva_factura():
         productos=productos,
         formas_pago=formas_pago
     )
+
 @app.route('/guardar_factura', methods=['POST'])
 def guardar_factura():
     cliente_id = request.form['cliente']
@@ -167,7 +178,6 @@ def guardar_factura():
         iva_total = Decimal(0)
         total_total = Decimal(0)
 
-        # Insertar detalles de productos en un solo ciclo
         i = 1
         while True:
             producto_id = request.form.get(f'producto_{i}')
@@ -178,13 +188,19 @@ def guardar_factura():
             producto_id = int(producto_id)
             cantidad = int(cantidad)
 
-            # Obtener precio unitario del producto
-            cursor.execute("SELECT precio FROM Productos WHERE id_producto = ?", (producto_id,))
-            precio_unitario = cursor.fetchone()
-            if precio_unitario is None:
+            # Obtener precio unitario y stock del producto
+            cursor.execute("SELECT precio, existencia_bodega FROM Productos WHERE id_producto = ?", (producto_id,))
+            producto = cursor.fetchone()
+            if producto is None:
                 return f"Producto con ID {producto_id} no encontrado", 404
 
-            precio_unitario = precio_unitario[0]
+            precio_unitario, stock_actual = producto
+
+            # Verificar si hay suficiente stock
+            if stock_actual < cantidad:
+                return f"No hay suficiente stock para el producto {producto_id} (Disponible: {stock_actual})", 400
+
+            # Calcular valores
             subtotal = precio_unitario * cantidad
             descuento_aplicado = (subtotal * Decimal(descuento)) / Decimal(100)
             subtotal_con_descuento = subtotal - descuento_aplicado
@@ -207,27 +223,39 @@ def guardar_factura():
                 (id_venta, producto_id, cantidad, precio_unitario, subtotal)
             )
 
+            # Restar cantidad de existencia_bodega
+            cursor.execute(
+                """
+                UPDATE Productos
+                SET existencia_bodega = existencia_bodega - ?
+                WHERE id_producto = ?
+                """,
+                (cantidad, producto_id)
+            )
+
             i += 1  # Continuar con el siguiente producto
 
         # Actualizar totales de la factura
         cursor.execute(
             """
             UPDATE Ventas
-            SET SubTotal = ?, Total = ?, TotalFactura = ?,DescuentoAplicado = ?,SubTotalConDescuento = ?,IVA = ?
+            SET SubTotal = ?, Total = ?, TotalFactura = ?, DescuentoAplicado = ?, SubTotalConDescuento = ?, IVA = ?
             WHERE IDVenta = ?
             """,
-            (subtotal_total, total_total, total_total,descuento_aplicado_total,subtotal_con_descuento_total,iva_total, id_venta)
+            (subtotal_total, total_total, total_total, descuento_aplicado_total, subtotal_con_descuento_total, iva_total, id_venta)
         )
 
         conn.commit()
 
     except Exception as e:
+        conn.rollback()  # Revertir cambios si hay un error
         print(f"Error al guardar la factura: {e}")
         return f"Error al guardar la factura: {e}", 500  
     finally:
         conn.close()
 
     return redirect(url_for('factura_confirmada', id_venta=id_venta))
+
 
 @app.route('/factura_confirmada', methods=['GET'])
 def factura_confirmada():
@@ -460,9 +488,272 @@ def terminar_factura():
         
     return render_template('terminar_factura.html')
 
+@app.route('/facturas')
+def ver_facturas():
+    username = "usuario"
+    password = "contraseña"
+
+    try:
+        conn = get_db_connection(username, password)
+        cursor = conn.cursor()
+
+        # Obtener todas las facturas con información relevante
+        cursor.execute('''
+            SELECT v.IDVenta, c.NombreCompleto AS Cliente, ve.NombreVendedor AS Vendedor, 
+                   f.descripcion AS FormaPago,  v.Total 
+            FROM Ventas v
+            JOIN Clientes c ON v.IDCliente = c.IDCliente
+            JOIN Vendedores ve ON v.IDVendedor = ve.IDVendedor
+            JOIN Formas_Pago f ON v.IDFormaPago = f.id_pago
+            ORDER BY v.IDVenta DESC
+        ''')
+        facturas = cursor.fetchall()
+
+        conn.close()
+
+        return render_template('facturas.html', facturas=facturas)
+
+    except Exception as e:
+        print(f"Error al obtener las facturas: {e}")
+        return f"Error al obtener las facturas: {e}", 500
+
+@app.route('/editar_factura/<int:id_venta>', methods=['GET', 'POST'])
+def editar_factura(id_venta):
+    username = "usuario"
+    password = "contraseña"
+
+    try:
+        conn = get_db_connection(username, password)
+        cursor = conn.cursor()
+
+        # Obtener los datos de la venta
+        cursor.execute('SELECT * FROM Ventas WHERE IDVenta = ?', (id_venta,))
+        venta = cursor.fetchone()
+
+        if not venta:
+            return "Factura no encontrada", 404  
+
+        # Obtener información del cliente
+        cursor.execute('SELECT * FROM Clientes WHERE IDCliente = ?', (venta[1],))
+        cliente = cursor.fetchone()
+
+        # Obtener información del vendedor
+        cursor.execute('SELECT * FROM Vendedores WHERE IDVendedor = ?', (venta[2],))
+        vendedor = cursor.fetchone()
+
+        # Obtener información de la forma de pago
+        cursor.execute('SELECT * FROM Formas_Pago WHERE id_pago = ?', (venta[3],))
+        forma_pago = cursor.fetchone()
+
+        # Obtener productos comprados desde Detalle_Ventas
+        cursor.execute(''' 
+            SELECT 
+                p.nombre AS NombreProducto,
+                dv.IDProducto,
+                dv.Cantidad,
+                dv.PrecioUnitario,
+                dv.SubTotal
+            FROM 
+                Detalle_Ventas dv
+            JOIN 
+                Productos p ON dv.IDProducto = p.id_producto
+            WHERE 
+                dv.IDVenta = ?
+        ''', (id_venta,))
+
+        productos = cursor.fetchall()
+
+        productos_separados = [
+            {
+                'nombre': producto[0], 
+                'id_producto': producto[1],
+                'cantidad': producto[2],
+                'precio': producto[3],  
+                'subtotal': producto[4]  
+            }
+            for producto in productos
+        ]
+
+        if request.method == 'POST':
+            descuento = request.form.get('descuento', 0)
+
+            # Verificar que la cantidad no esté vacía
+            i = 1
+            while True:
+                cantidad = request.form.get(f'cantidad_{i}')
+                if not cantidad:
+                    break  # Salir si no hay más cantidades
+
+                try:
+                    cantidad = int(cantidad)  # Convertir a entero
+                except ValueError:
+                    return "La cantidad debe ser un número entero válido", 400  # Si no es un entero
+
+                if cantidad <= 0:
+                    return "La cantidad debe ser mayor que cero", 400
+
+                producto_id = request.form.get(f'producto_id_{i}')
+                if not producto_id:
+                    return "Producto no encontrado", 400
+
+                try:
+                    producto_id = int(producto_id)
+                except ValueError:
+                    return "Producto no válido", 400  # Si el ID no es un número
+
+                # Obtener precio unitario del producto
+                cursor.execute("SELECT precio FROM Productos WHERE id_producto = ?", (producto_id,))
+                precio_unitario = cursor.fetchone()
+
+                if not precio_unitario:
+                    return f"Producto con ID {producto_id} no encontrado", 400  # Si no se encuentra el producto
+
+                precio_unitario = precio_unitario[0]
+
+                # Calcular nuevo subtotal
+                subtotal = precio_unitario * cantidad
+
+                try:
+                    # Actualizar la venta principal (solo descuento)
+                    cursor.execute(''' 
+                        UPDATE Ventas
+                        SET Descuento = ?
+                        WHERE IDVenta = ?
+                    ''', (descuento, id_venta))
+
+                    # Eliminar los productos anteriores de la venta
+                    cursor.execute(''' 
+                        DELETE FROM Detalle_Ventas WHERE IDVenta = ?
+                    ''', (id_venta,))
+
+                    # Insertar los nuevos productos en Detalle_Ventas
+                    cursor.execute(''' 
+                        INSERT INTO Detalle_Ventas (IDVenta, IDProducto, Cantidad, PrecioUnitario, SubTotal)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (id_venta, producto_id, cantidad, precio_unitario, subtotal))
+
+                    conn.commit()  # Confirmar los cambios
+                except Exception as e:
+                    conn.rollback()  # Revertir cambios si hay un error
+                    print(f"Error al guardar la edición de la factura: {e}")
+                    return f"Error al guardar la factura: {e}", 500
+
+                i += 1
+
+            conn.close()  # Cerrar la conexión después de las operaciones
+
+            return redirect(url_for('factura_confirmada', id_venta=id_venta))
+
+        return render_template(
+            'editar_factura.html',
+            id_venta=id_venta,
+            venta=venta,
+            cliente=cliente,
+            vendedor=vendedor,
+            forma_pago=forma_pago,
+            productos=productos_separados
+        )
+
+    except Exception as e:
+        print(f"Error al editar la factura: {e}")
+        return f"Error al editar la factura: {e}", 500
+
+
+@app.route('/buscar_productos', methods=['GET'])
+def buscar_productos():
+    termino = request.args.get('q', '').strip()
+
+    if not termino:
+        return jsonify([])  # Si el usuario no escribió nada, devolvemos una lista vacía.
+
+    try:
+        username = "usuario"
+        password = "contraseña"
+        conn = get_db_connection(username, password)
+        cursor = conn.cursor()
+
+        # Filtrar productos activos
+        query = """
+            SELECT id_producto, nombre, precio 
+            FROM Productos p
+            WHERE p.nombre LIKE ? 
+            AND NOT EXISTS (
+                SELECT 1 FROM productos_inactivos pi WHERE pi.id_producto = p.id_producto
+            )
+        """
+        cursor.execute(query, ('%' + termino + '%',))
+        productos = [{"id": row.id_producto, "text": f"{row.nombre} - ${row.precio:.2f}"} for row in cursor.fetchall()]
+
+        return jsonify(productos)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    
+@app.route('/buscar_cliente', methods=['GET'])
+def buscar_cliente():
+    contacto = request.args.get('contacto', '').strip()
+
+    if not contacto:
+        return jsonify([])  # Si el usuario no escribió nada, devolvemos una lista vacía.
+
+    try:
+        username = "usuario"
+        password = "contraseña"
+        conn = get_db_connection(username, password)
+        cursor = conn.cursor()
+
+        # Filtrar clientes activos
+        query = """
+            SELECT IDCliente, NombreCompleto, Contacto 
+            FROM Clientes 
+            WHERE Contacto LIKE ? 
+            AND Estado = 'Activo'
+        """
+        cursor.execute(query, ('%' + contacto + '%',))
+        clientes = [{"id": row.IDCliente, "nombre": row.NombreCompleto, "contacto": row.Contacto} for row in cursor.fetchall()]
+
+        return jsonify(clientes)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/buscar_vendedor', methods=['GET'])
+def buscar_vendedor():
+    id_vendedor = request.args.get('id', '')
+
+    try:
+        username = "usuario"
+        password = "contraseña"
+        conn = get_db_connection(username, password)
+        cursor = conn.cursor()
+
+        query = "SELECT IDVendedor, NombreVendedor FROM Vendedores WHERE IDVendedor LIKE ?"
+        cursor.execute(query, ('%' + id_vendedor + '%',))
+        vendedores = [{"id": row.IDVendedor, "nombre": row.NombreVendedor} for row in cursor.fetchall()]
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(vendedores)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 app.register_blueprint(clientes_bp, url_prefix='/cliente') 
 
 app.register_blueprint(inventario_bp, url_prefix='/inventario') 
+
+app.register_blueprint(vendedores_bp, url_prefix='/vendedor') 
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

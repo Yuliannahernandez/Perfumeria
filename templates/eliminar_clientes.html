@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambiar Estado del Cliente</title>
+</head>
+<body>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cambiar Estado del Cliente</title>
+    </head>
+    <body>
+        <h1>Cambiar Estado del Cliente</h1>
+        <p>¿Estás seguro de que quieres <strong>{% if cliente.Estado == 'Activo' %}inactivar{% else %}activar{% endif %}</strong> al cliente <strong>{{ cliente.NombreCompleto }}</strong>?</p>
+        <form method="POST">
+            <button type="submit">{% if cliente.Estado == 'Activo' %}Inactivar{% else %}Activar{% endif %}</button>
+            <a href="{{ url_for('cliente.ver_clientes') }}">Cancelar</a>
+        </form>
+    </body>
+    </html>
+    

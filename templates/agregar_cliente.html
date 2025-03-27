@@ -4,113 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Cliente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@300&display=swap');
-        
         body {
             font-family: 'Cinzel', serif;
-            background: linear-gradient(135deg, #102223, #2a3e44); /* Fondo elegante con tonos verdes y grises */
-            color: white;
-            text-align: center;
-            padding: 50px 0;
+            background-color: #fff;
+            color: #102223;
             margin: 0;
+            padding: 0;
+            text-align: center;
         }
-
-        .container {
-            background: #ffffff;
-            color: #253236; /* Color oscuro para el texto dentro del contenedor */
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-            margin-top: 50px;
-            width: 100%;
-            max-width: 600px;
+        header {
+            background-color: #102223;
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            margin-bottom: 40px;
         }
-
-        h2 {
-            font-weight: 300;
-            font-size: 32px;
-            margin-bottom: 20px;
-            color: #2a3e44;
-        }
-
-        label {
-            font-size: 16px;
-            font-weight: 400;
+        h1 {
+            font-weight: 700;
+            font-size: 2.5em;
             margin-bottom: 10px;
-            display: inline-block;
+        }
+        p {
+            font-weight: 400;
+            font-size: 1.2em;
+        }
+        form {
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 500px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: left;
         }
-
-        input, select, button {
-            padding: 12px;
-            margin: 12px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-family: 'Cinzel', serif;
-            font-size: 16px;
+        label {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+            color: #102223;
         }
-
         input, select {
             width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            border: 1px solid #102223;
+            border-radius: 5px;
+            background-color: #f0f0f0;
         }
-
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1d2c33;
+        }
         button {
-            background-color: #2a3e44; /* Fondo oscuro para el botón */
+            background-color: #102223;
             color: white;
-            cursor: pointer;
             border: none;
-            font-size: 18px;
-            font-weight: 600;
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
         }
-
         button:hover {
-            background-color: #1a2d34; /* Cambio de color a un tono más oscuro */
-            transition: background-color 0.3s ease;
+            background-color: #1d2c33;
         }
-
-        .message {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
+        a button {
+            background-color: black;
+            color: white;
+            font-family: 'Cinzel', serif;
+            font-weight: 400;
+            text-transform: uppercase;
         }
-
-        .message.success {
-            color: #4cae4c; /* Verde suave para mensajes de éxito */
+        h2 {
+            font-size: 2em;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            color: #102223;
         }
-        
-        .message.error {
-            color: #d9534f; /* Rojo suave para errores */
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #102223;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #e2e2e2;
+        }
+        a {
+            display: inline-block;
+            margin: 20px auto;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Agregar Cliente</h2>
-        <form method="POST">
-            <label for="nombre_completo">Nombre Completo:</label>
-            <input type="text" id="nombre_completo" name="nombre_completo" required>
-            
-            <label for="contacto">Contacto:</label>
-            <input type="text" id="contacto" name="contacto" required>
-            
-            <label for="correo">Correo Electrónico:</label>
-            <input type="email" id="correo" name="correo" required>
-            
-            <label for="tipo_cliente">Tipo de Cliente:</label>
-            <select id="tipo_cliente" name="tipo_cliente" required>
-                {% for tipo in tipos_clientes %}
-                    <option value="{{ tipo.IDTipo }}">{{ tipo.Descripcion }}</option>
-                {% endfor %}
-            </select>
-            
-            <button type="submit">Agregar Cliente</button>
-        </form>
-        {% if message %}
-            <p class="message {% if 'exitosamente' in message %}success{% else %}error{% endif %}">{{ message }}</p>
-        {% endif %}
-    </div>
+
+    <header>
+        <a href="{{ url_for('cliente.ver_clientes') }}">
+            <button type="button">Ver Clientes</button>
+        </a>
+        <h1>Agregar Cliente</h1>
+        <p>{{ message }}</p>
+    </header>
+
+    <form method="POST">
+        <label for="nombre_completo">Nombre Completo:</label>
+        <input type="text" name="nombre_completo" required><br>
+
+        <label for="contacto">Contacto:</label>
+        <input type="text" name="contacto" required><br>
+
+        <label for="correo">Correo:</label>
+        <input type="email" name="correo" required><br>
+
+        <label for="tipo_cliente">Tipo de Cliente:</label>
+        <select name="tipo_cliente" required>
+            {% for tipo in tipos_clientes %}
+                <option value="{{ tipo.IDTipo }}">{{ tipo.Descripcion }}</option>
+            {% endfor %}
+        </select><br>
+
+        <button type="submit">Agregar Cliente</button>
+    </form>
+
+    <h2>Clientes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>IDCliente</th>
+                <th>Nombre Completo</th>
+                <th>Contacto</th>
+                <th>Correo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.IDCliente }}</td>
+                    <td>{{ cliente.NombreCompleto }}</td>
+                    <td>{{ cliente.Contacto }}</td>
+                    <td>{{ cliente.Correo }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </body>
 </html>
-

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Factura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #102223;
+            color: #ffffff;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 60%;
+            margin-top: 40px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .title-section {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #102223;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #102223;
+        }
+
+        .form-control {
+            font-size: 16px;
+            border-radius: 8px;
+            border: 2px solid #102223;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: #0c1717;
+            outline: none;
+            transform: scale(1.02);
+        }
+
+        .readonly-fields .form-control {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .btn-primary, .btn-secondary {
+            background-color: #102223;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+            color: white;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            background-color: #0c1717;
+            transform: scale(1.05);
+        }
+
+        .small-text {
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .product-container {
+            padding: 10px;
+            border: 2px solid #102223;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="title-section">Editar Factura - ID Venta: {{ id_venta }}</h2>
+
+        <form method="POST">
+            <!-- Datos de Cliente y Vendedor -->
+            <div class="mb-3">
+                <label for="cliente" class="form-label">Cliente</label>
+                <input type="text" class="form-control readonly-fields" id="cliente" value="{{ cliente[1] }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="vendedor" class="form-label">Vendedor</label>
+                <input type="text" class="form-control readonly-fields" id="vendedor" value="{{ vendedor[1] }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="forma_pago" class="form-label">Forma de Pago</label>
+                <input type="text" class="form-control readonly-fields" id="forma_pago" value="{{ forma_pago[1] }}" readonly>
+            </div>
+
+            <h4 class="title-section" style="font-size: 1.5em;">Productos Comprados</h4>
+            
+            <!-- Listado de productos -->
+            {% for producto in productos %}
+                <div class="product-container">
+                    <label class="form-label">{{ producto.nombre }}</label>
+                    <input type="number" class="form-control" name="cantidad_{{ loop.index }}" value="{{ producto.cantidad }}" min="1" required>
+                    <input type="hidden" name="producto_id_{{ loop.index }}" value="{{ producto.id_producto }}">
+                    <input type="hidden" name="precio_{{ loop.index }}" value="{{ producto.precio }}">
+                    <small class="small-text">Subtotal: {{ producto.subtotal }}</small>
+                </div>
+            {% endfor %}
+
+            <!-- Descuento -->
+            <div class="mb-3">
+                <label for="descuento" class="form-label">Descuento (%)</label>
+                <input type="number" class="form-control" id="descuento" name="descuento" value="{{ venta[4] }}" min="0">
+            </div>
+
+            <!-- Botones -->
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="/facturas" class="btn btn-secondary">Volver</a>
+        </form>
+    </div>
+</body>
+
+</html>
