@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Punto de Reorden</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .total {
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Perfumería ESSENZA</h1>
+        <h2>Reporte General Punto de Reorden de Productos</h2>
+        <p>Fecha: {{ fecha }} | Pág. No. 1</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Descripción</th>
+                <th>Existencia</th>
+                <th>Historial de Ventas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+                <tr>
+                    <td>{{ producto[0] }}</td> 
+                    <td>{{ producto[1] }} {{ producto[2] }}</td> 
+                    <td>{{ producto[3] }}</td> 
+                    <td>{{ producto[3] * producto[4] }}</td> 
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Total, de Producto(s) en su punto: {{ total_productos_punto }}</p>
+    </div>
+</body>
+</html>

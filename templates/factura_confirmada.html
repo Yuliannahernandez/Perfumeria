@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factura Confirmada</title>
     <style>
-        /* Importar la fuente Cinzel */
+       
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
 
         body {
@@ -98,7 +98,6 @@
     <div class="header">
         <h1>Factura Confirmada</h1>
         <p><strong>Número de Factura:</strong> {{ id_venta }}</p>
-        <p><strong>Identificador de Venta Personalizado:</strong> {{ id_venta_personalizado }}</p>
     </div>
 
     <div class="factura-info">
@@ -141,6 +140,8 @@
         <p><strong>Subtotal con Descuento:</strong> {{ subtotal_con_descuento }}</p>
         <p><strong>IVA (13%):</strong> {{ iva }}</p>
         <p><strong>Total a Pagar:</strong> {{ total_con_iva }}</p>
+        <p><strong>Fecha de Venta:</strong> {{ fecha_venta }}</p>
+
     </div>
 
     <a href="javascript:void(0)" class="btn" onclick="window.print()">Imprimir Factura</a>

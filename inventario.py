@@ -9,18 +9,16 @@ def agregar_producto():
     tipos_productos = []  # Para almacenar los tipos de productos
     productos = []  # Para almacenar los productos del inventario
     
-    from app import get_db_connection  # Importar la función de conexión a la base de datos
+    from app import get_db_connection 
 
-    # Definir el username y password para la conexión a la base de datos
     username = "usuario"
     password = "contraseña"
 
     try:
-        # Conexión a la base de datos
-        conn = get_db_connection(username, password)  # Usar los parámetros de conexión adecuados
+       
+        conn = get_db_connection(username, password) 
         cursor = conn.cursor()
 
-        # Si el método es POST, procesamos la información
         if request.method == 'POST':
             nombre = request.form['nombre']
             descripcion = request.form['descripcion']
@@ -33,21 +31,19 @@ def agregar_producto():
             existencia_bodega = request.form['existencia_bodega']
            
 
-            # Consultamos el último id de producto y le sumamos 1 para obtener el siguiente
             cursor.execute("SELECT TOP 1 id_producto FROM Productos ORDER BY id_producto DESC")
             ultimo_producto = cursor.fetchone()
 
             if ultimo_producto:
-                # Asegúrate de que el IDProducto es numérico y sumamos 1
+       
                 nuevo_id = ultimo_producto[0] + 1
             else:
-                # Si no hay productos registrados, comenzamos con ID 1
+             
                 nuevo_id = 1
 
-            # Asignamos el nuevo id de producto
             id_producto = nuevo_id
 
-            # Inserción en la base de datos
+    
             cursor.execute("""
                 INSERT INTO Productos ( nombre, descripcion, peso_ml, marca, concentracion, precio, tipo_producto_id, existencia_estantes, existencia_bodega)
                 VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -56,7 +52,7 @@ def agregar_producto():
             conn.commit()
             message = "Producto agregado exitosamente."
 
-        # Consultamos los tipos de productos para el formulario
+
         cursor.execute("SELECT id_tipo_producto, nombre FROM Tipos_Productos")
         tipos_productos = cursor.fetchall()
 
@@ -69,7 +65,7 @@ def agregar_producto():
 
                 # Agregamos el símbolo de colones a los precios
         for i, producto in enumerate(productos):
-            precio_colones = producto[3]  # El precio ya debería estar en colones
+            precio_colones = producto[3]  
             productos[i] = list(producto)
             productos[i][3] = "₡{:,.2f}".format(precio_colones)  # Formateamos el precio con símbolo de colones
 
@@ -85,25 +81,24 @@ def agregar_producto():
 @inventario_bp.route('/ver_producto', methods=['GET', 'POST'])
 def ver_producto():
     message = ""
-    productos_por_tipo = {}  # Para almacenar los productos agrupados por tipo
+    productos_por_tipo = {}  
     search_id = request.args.get('search_id', '').strip()
 
-    from app import get_db_connection  # Importar la función de conexión a la base de datos
+    from app import get_db_connection  
 
-    # Definir el username y password para la conexión a la base de datos
+   
     username = "usuario"
     password = "contraseña"
 
-    # Si el método es POST, obtener el valor de búsqueda del formulario
     if request.method == 'POST':
         search_id = request.form['search_id']
     
     try:
-        # Conexión a la base de datos
+        
         conn = get_db_connection(username, password)
         cursor = conn.cursor()
 
-        # Construimos la consulta SQL según si se especificó un search_id
+        
         if search_id:
             cursor.execute("""
                 SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.existencia_estantes, p.existencia_bodega, tp.nombre AS tipo_producto
@@ -113,7 +108,7 @@ def ver_producto():
                 WHERE pi.id_producto IS NULL AND (p.id_producto LIKE ? OR p.nombre LIKE ?)
             """, ('%' + search_id + '%', '%' + search_id + '%'))
         else:
-            # Si no hay búsqueda, mostramos todos los productos
+            
             cursor.execute("""
                 SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.existencia_estantes, p.existencia_bodega, tp.nombre AS tipo_producto
                 FROM Productos p
@@ -126,7 +121,7 @@ def ver_producto():
 
         # Agrupar los productos por tipo
         for producto in productos:
-            tipo_producto = producto[6]  # Tipo del producto (nombre de tipo_producto)
+            tipo_producto = producto[6]  
             if tipo_producto not in productos_por_tipo:
                 productos_por_tipo[tipo_producto] = []
             productos_por_tipo[tipo_producto].append({
@@ -152,20 +147,20 @@ def ver_producto():
 def modificar_producto(id):
     message = ""
     producto = None
-    tipos_productos = []  # Para almacenar los tipos de productos
+    tipos_productos = []  
     
-    from app import get_db_connection  # Importar la función de conexión a la base de datos
+    from app import get_db_connection 
 
-    # Definir el username y password para la conexión a la base de datos
+   
     username = "usuario"
     password = "contraseña"
 
     try:
-        # Conexión a la base de datos
+
         conn = get_db_connection(username, password)
         cursor = conn.cursor()
 
-        # Obtener los datos actuales del producto
+   
         cursor.execute("SELECT * FROM Productos WHERE id_producto = ?", (id,))
         producto = cursor.fetchone()
 
@@ -173,7 +168,6 @@ def modificar_producto(id):
             message = "Producto no encontrado."
             return redirect(url_for('inventario.ver_producto'))
 
-        # Obtener tipos de productos para el formulario
         cursor.execute("SELECT id_tipo_producto, nombre FROM Tipos_Productos")
         tipos_productos = cursor.fetchall()
 
@@ -213,18 +207,17 @@ from flask import request, jsonify
 def eliminar_producto(id):
     message = ""
 
-    from app import get_db_connection  # Importar la función de conexión a la base de datos
+    from app import get_db_connection  
 
-    # Definir el username y password para la conexión a la base de datos
     username = "usuario"
     password = "contraseña"
 
     try:
-        # Conexión a la base de datos
+
         conn = get_db_connection(username, password)
         cursor = conn.cursor()
 
-        # Comprobar si el producto existe antes de marcarlo como inactivo
+
         cursor.execute("SELECT * FROM Productos WHERE id_producto = ?", (id,))
         producto = cursor.fetchone()
 
@@ -232,7 +225,7 @@ def eliminar_producto(id):
             message = "Producto no encontrado."
             return redirect(url_for('inventario.ver_productos'))
 
-        # Verificar si el producto ya está inactivo
+
         cursor.execute("SELECT * FROM productos_inactivos WHERE id_producto = ?", (id,))
         inactivo = cursor.fetchone()
 
@@ -250,5 +243,5 @@ def eliminar_producto(id):
         if conn:
             conn.close()
 
-    # Redirigir a la página de productos después de marcarlo como inactivo
+  
     return redirect(url_for('inventario.ver_producto', message=message))

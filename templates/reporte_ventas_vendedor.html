@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Ventas por Vendedor</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select,
+        button {
+            padding: 10px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .alert {
+            color: red;
+            font-weight: bold;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Reporte de Ventas por Vendedor</h1>
+        <h2>Fecha: {{ fecha }}</h2>
+
+        {% if message %}
+        <p class="alert">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="vendedor_inicial">Vendedor Inicial:</label>
+                <select name="vendedor_inicial" id="vendedor_inicial" required>
+                    <option value="">Seleccione un vendedor</option>
+                    {% for vendedor in vendedores %}
+                    <option value="{{ vendedor }}">{{ vendedor }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vendedor_final">Vendedor Final:</label>
+                <select name="vendedor_final" id="vendedor_final">
+                    <option value="">Seleccione un vendedor (opcional)</option>
+                    {% for vendedor in vendedores %}
+                    <option value="{{ vendedor }}">{{ vendedor }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Generar Reporte</button>
+        </form>
+
+        {% if ventas %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                    <th>Vendedor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in ventas %}
+                <tr>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td class="text-right">₡{{ "{:,.2f}".format(row[3] or 0) }}</td> <!-- Para el precio -->
+                    <td class="text-right">{{ row[4] if row[4] is not none else 0 }}</td> <!-- Para la cantidad -->
+                    <td class="text-right">₡{{ "{:,.2f}".format((row[3] or 0) * (row[4] or 0)) }}</td> <!-- Total Vendido -->
+                    <td>{{ row[6] }}</td> <!-- Vendedor -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="total">Total General: ₡{{ "{:,.2f}".format(total_general) }}</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

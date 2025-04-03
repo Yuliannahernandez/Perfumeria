@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Ventas Diarias por Producto</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #102223;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select,
+        button {
+            padding: 10px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .alert {
+            color: red;
+            font-weight: bold;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Reporte de Ventas Diarias por Producto</h1>
+        <h2>Fecha: {{ fecha }}</h2>
+
+        {% if message %}
+        <p class="alert">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="producto_inicial">Producto Inicial:</label>
+                <select name="producto_inicial" id="producto_inicial" required>
+                    <option value="">Seleccione un producto</option>
+                    {% for producto in productos %}
+                    <option value="{{ producto }}">{{ producto }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="producto_final">Producto Final:</label>
+                <select name="producto_final" id="producto_final">
+                    <option value="">Seleccione un producto (opcional)</option>
+                    {% for producto in productos %}
+                    <option value="{{ producto }}">{{ producto }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Generar Reporte</button>
+        </form>
+
+        {% if ventas %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Producto</th>
+                    <th>Categoría</th>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Cantidad Vendida</th>
+                    <th>Total Vendido</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta[0] }}</td>
+                    <td>{{ venta[1] }}</td>
+                    <td>{{ venta[2] }}</td>
+                    <td>{{ venta[3] }}</td>
+                    <td class="text-right">₡{{ "{:,.2f}".format(venta[5] or 0) }}</td> <!-- Para el precio -->
+                    <td class="text-right">{{ venta[6] if venta[6] is not none else 0 }}</td> <!-- Para la cantidad vendida -->
+                    <td class="text-right">₡{{ "{:,.2f}".format((venta[5] or 0) * (venta[6] or 0)) }}</td> <!-- Total Vendido (Precio * Cantidad) -->
+
+
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p class="total">Monto total de las Ventas: ₡{{ "{:,.2f}".format(total_general) }}</p>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

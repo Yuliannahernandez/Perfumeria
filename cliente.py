@@ -23,27 +23,27 @@ def agregar_cliente():
             contacto = request.form['contacto']
             correo = request.form['correo']
             tipo_cliente = request.form['tipo_cliente']
-            estado = "Activo"  # Activo por defecto
+            estado = "Activo" 
             fecha_creacion = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            # Consultar el último IDCliente y sumarle 1 para obtener el siguiente
+  
             cursor.execute("SELECT TOP 1 IDCliente FROM Clientes ORDER BY IDCliente DESC")
             ultimo_cliente = cursor.fetchone()
 
             if ultimo_cliente:
-                # Asegurarse de que el valor es un número
+
                 if isinstance(ultimo_cliente[0], str):
-                    # Si el IDCliente tiene formato 'CLxxxx', extraemos solo el número
-                    ultimo_id = int(ultimo_cliente[0][2:])  # Omite las dos primeras letras y toma el número
+                
+                    ultimo_id = int(ultimo_cliente[0][2:]) 
                     nuevo_id = ultimo_id + 1
                 else:
-                    # Si el valor de IDCliente es numérico, simplemente sumamos 1
+                   
                     nuevo_id = ultimo_cliente[0] + 1
             else:
-                # Si no hay clientes, comenzar con 6
+             
                 nuevo_id = 6
 
-            # Generar el nuevo IDCliente como número
+           
             id_cliente = nuevo_id
 
             # Inserción en la base de datos
@@ -85,10 +85,10 @@ def ver_clientes():
 
         # Consultar todos los clientes
         if search_id:
-            # Filtrar por IDCliente si se proporcionó el filtro
+           
             cursor.execute("SELECT IDCliente, NombreCompleto, Contacto, Correo, Estado FROM Clientes WHERE IDCliente LIKE ?", ('%' + search_id + '%',))
         else:
-            # Si no hay filtro, traer todos los clientes
+           
             cursor.execute("SELECT IDCliente, NombreCompleto, Contacto, Correo, Estado FROM Clientes")
         clientes = cursor.fetchall()
 

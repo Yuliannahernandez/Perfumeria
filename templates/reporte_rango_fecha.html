@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Ventas por Rango de Fechas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            background-color: #fff;
+        }
+        .total {
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .message {
+            color: red;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Reporte de Ventas por Rango de Fechas</h1>
+    
+    <form method="POST">
+        <label for="fecha_inicial">Fecha Inicial:</label>
+        <input type="date" name="fecha_inicial" id="fecha_inicial" required>
+        
+        <label for="fecha_final">Fecha Final:</label>
+        <input type="date" name="fecha_final" id="fecha_final" required>
+        
+        <button type="submit">Generar Reporte</button>
+    </form>
+
+    <h2>Fecha del reporte: {{ fecha }}</h2>
+
+    {% if message %}
+        <p class="message">{{ message }}</p>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                    <tr>
+                        <td>{{ venta[0] }}</td>
+                        <td>{{ venta[1] }} - {{ venta[2] }}</td>
+                        <td>{{ venta[3] }}</td>
+                        <td>{{ "{:,.2f}".format(venta[4]) }}</td>
+                        <td>{{ venta[5] }}</td>
+                        <td>{{ "{:,.2f}".format(venta[4] * venta[5]) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total">
+            <p>Total General: {{ "{:,.2f}".format(total_general) }}</p>
+        </div>
+    {% endif %}
+
+</body>
+</html>

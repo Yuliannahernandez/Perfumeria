@@ -172,13 +172,13 @@
                 </thead>
                 <tbody>
                     {% for producto in productos_tipo %}
-                        <tr {% if producto.existencia_estantes <= 10 or producto.existencia_bodega <= 10 %}style="background-color: #f39c12;"{% endif %}>
+                        <tr {% if producto.existencia_estantes <= 5 or producto.existencia_bodega <= 5 %}style="background-color: #f39c12;"{% endif %}>
                             <td>{{ producto.id_producto }}</td>
                             <td>{{ producto.nombre }}</td>
                             <td>{{ producto.descripcion }}</td>
                             <td>{{ producto.precio }}</td>
-                            <td class="{% if producto.existencia_estantes <= 10 %}subrayado{% endif %}">{{ producto.existencia_estantes }}</td>
-                            <td class="{% if producto.existencia_bodega <= 10 %}subrayado{% endif %}">{{ producto.existencia_bodega }}</td>
+                            <td class="{% if producto.existencia_estantes <= 5 %}subrayado{% endif %}">{{ producto.existencia_estantes }}</td>
+                            <td class="{% if producto.existencia_bodega <= 5 %}subrayado{% endif %}">{{ producto.existencia_bodega }}</td>
                             <td>
                                 <a href="{{ url_for('inventario.modificar_producto', id=producto.id_producto) }}" style="color: #2980b9; text-decoration: none;">Modificar</a> |
                                 <form action="{{ url_for('inventario.eliminar_producto', id=producto.id_producto) }}" method="POST" style="display:inline;">

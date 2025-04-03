@@ -3,7 +3,6 @@ from datetime import datetime
 
 vendedores_bp = Blueprint('vendedor', __name__)
 
-# Ruta para agregar un vendedor
 @vendedores_bp.route('/agregar_vendedor', methods=['GET', 'POST'])
 def agregar_vendedor():
     message = ""
@@ -21,29 +20,28 @@ def agregar_vendedor():
             nombre = request.form['nombre_completo']
             celular = request.form['celular']
             correo = request.form['correo']
-            estado = "Activo"  # Activo por defecto
+            estado = "Activo" 
             fecha_ingreso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cuenta_vendedor = request.form['cuenta_vendedor']  # Se agrega el campo cuenta_vendedor
+            cuenta_vendedor = request.form['cuenta_vendedor']  
 
-            # Consultar el último IDVendedor y sumarle 1 para obtener el siguiente
             cursor.execute("SELECT TOP 1 IDVendedor FROM Vendedores ORDER BY IDVendedor DESC")
             ultimo_vendedor = cursor.fetchone()
 
             if ultimo_vendedor and ultimo_vendedor[0].isdigit():
-                # Si el último IDVendedor es numérico, sumamos 1
+               
                 nuevo_id = int(ultimo_vendedor[0]) + 1
             else:
-                # Si no hay vendedores, comenzamos con 1
-                nuevo_id = 1
+                
+                nuevo_id = 11
 
-            # Generar el nuevo IDVendedor como número
+            
             id_vendedor = nuevo_id
 
-            # Inserción en la base de datos, agregando CuentaVendedor
+            
             cursor.execute("""
                 INSERT INTO Vendedores (IDVendedor, NombreVendedor, Celular, Correo, Estado, FechaIngreso, CuentaVendedor)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (id_vendedor, nombre, celular, correo, estado, fecha_ingreso, cuenta_vendedor))  # Se agrega CuentaVendedor
+            """, (id_vendedor, nombre, celular, correo, estado, fecha_ingreso, cuenta_vendedor)) 
 
             conn.commit()
             message = "Vendedor agregado exitosamente."
@@ -112,14 +110,13 @@ def modificar_vendedor(id_vendedor):
             celular = request.form['celular']
             correo = request.form['correo']
             estado = request.form['estado']
-            cuenta_vendedor = request.form['cuenta_vendedor']  # Se agrega el campo cuenta_vendedor
+            cuenta_vendedor = request.form['cuenta_vendedor']  
 
-            # Actualizar en la base de datos, añadiendo CuentaVendedor
             cursor.execute("""
                 UPDATE Vendedores 
                 SET NombreVendedor = ?, Celular = ?, Correo = ?, Estado = ?, CuentaVendedor = ?
                 WHERE IDVendedor = ?
-            """, (nombre, celular, correo, estado, cuenta_vendedor, id_vendedor))  # Se agrega CuentaVendedor
+            """, (nombre, celular, correo, estado, cuenta_vendedor, id_vendedor))  
 
             conn.commit()
             message = "Vendedor modificado exitosamente."

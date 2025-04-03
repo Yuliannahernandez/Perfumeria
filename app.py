@@ -6,12 +6,20 @@ from decimal import Decimal
 from cliente import clientes_bp 
 from inventario import inventario_bp
 from vendedor import vendedores_bp
-
+from datetime import datetime
+from reportes import reportes_bp
+from reportes_descuento import reportes_descuento_bp
+from reportes_iva import reportes_iva_bp
+from reporte_ventas_producto import reporte_ventas_producto_bp
+from reporte_ventas_vendedor import reporte_ventas_vendedor_bp
+from reporte_rango_fecha import reporte_rango_fecha_bp
+from reporte_punto_reorden import reporte_punto_reorden_bp
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "clave_secreta")
 
+fecha_venta = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 # Función para obtener la conexión a la base de datos
 def get_db_connection(username, password):
@@ -40,8 +48,6 @@ def get_user_role(username, conn):
     except pyodbc.Error as e:
         print(f"Error en consulta de usuario: {e}")
         return None
-    
-
 
 @app.route('/images/<filename>')
 def serve_image(filename):
@@ -118,7 +124,7 @@ def nueva_factura():
     cursor.execute("SELECT IDVendedor, NombreVendedor FROM Vendedores WHERE Estado = 'Activo'")
     vendedores = cursor.fetchall()
 
-    # 🔹 EXCLUIR productos inactivos
+    #EXCLUIR productos inactivos
     cursor.execute("""
     SELECT id_producto, nombre, precio 
     FROM productos p
@@ -127,7 +133,6 @@ def nueva_factura():
         SELECT 1 FROM productos_inactivos pi WHERE pi.id_producto = p.id_producto
     )
 """)
-
 
     productos = cursor.fetchall()
 
@@ -157,21 +162,20 @@ def guardar_factura():
         conn = get_db_connection(username, password)
         cursor = conn.cursor()
 
-        # Obtener el próximo ID de venta personalizado
         cursor.execute("SELECT COALESCE(MAX(IDVenta), 0) + 1 FROM Ventas")
         id_venta = cursor.fetchone()[0]
 
-        # Insertar la venta en "Ventas"
         cursor.execute(
-            """
-            INSERT INTO Ventas 
-            (IDCliente, IDVendedor, IDFormaPago, Descuento, SubTotal, Total, Estado, TotalFactura)
-            VALUES (?, ?, ?, ?, 0, 0, '1', 0)
-            """,
-            (cliente_id, str(vendedor_id), forma_pago_id, descuento)
-        )
+    """
+    INSERT INTO Ventas 
+    (IDCliente, IDVendedor, IDFormaPago, Descuento, SubTotal, Total, Estado, TotalFactura, FechaVenta)
+    VALUES (?, ?, ?, ?, 0, 0, '1', 0, ?)
+    """,
+    (cliente_id, str(vendedor_id), forma_pago_id, descuento, fecha_venta)
+)
+        
+        conn.commit()
 
-        # Inicializar los totales
         subtotal_total = Decimal(0)
         descuento_aplicado_total = Decimal(0)
         subtotal_con_descuento_total = Decimal(0)
@@ -183,8 +187,7 @@ def guardar_factura():
             producto_id = request.form.get(f'producto_{i}')
             cantidad = request.form.get(f'cantidad_{i}')
             if not producto_id or not cantidad:
-                break  # Salir si no hay más productos
-
+                break  
             producto_id = int(producto_id)
             cantidad = int(cantidad)
 
@@ -233,7 +236,7 @@ def guardar_factura():
                 (cantidad, producto_id)
             )
 
-            i += 1  # Continuar con el siguiente producto
+            i += 1  
 
         # Actualizar totales de la factura
         cursor.execute(
@@ -248,7 +251,7 @@ def guardar_factura():
         conn.commit()
 
     except Exception as e:
-        conn.rollback()  # Revertir cambios si hay un error
+        conn.rollback()  
         print(f"Error al guardar la factura: {e}")
         return f"Error al guardar la factura: {e}", 500  
     finally:
@@ -326,6 +329,7 @@ def factura_confirmada():
         subtotal_con_descuento = Decimal(venta[9])  
         iva = Decimal(venta[10])  
         total_con_iva = Decimal(venta[11])  
+        fecha_venta = venta[13]
 
         conn.close()
 
@@ -341,7 +345,8 @@ def factura_confirmada():
             descuento=descuento_aplicado,
             subtotal_con_descuento=subtotal_con_descuento,
             iva=iva,
-            total_con_iva=total_con_iva
+            total_con_iva=total_con_iva,
+            fecha_venta=fecha_venta
         )
 
     except Exception as e:
@@ -582,10 +587,10 @@ def editar_factura(id_venta):
             while True:
                 cantidad = request.form.get(f'cantidad_{i}')
                 if not cantidad:
-                    break  # Salir si no hay más cantidades
+                    break  
 
                 try:
-                    cantidad = int(cantidad)  # Convertir a entero
+                    cantidad = int(cantidad)  
                 except ValueError:
                     return "La cantidad debe ser un número entero válido", 400  # Si no es un entero
 
@@ -599,7 +604,7 @@ def editar_factura(id_venta):
                 try:
                     producto_id = int(producto_id)
                 except ValueError:
-                    return "Producto no válido", 400  # Si el ID no es un número
+                    return "Producto no válido", 400  
 
                 # Obtener precio unitario del producto
                 cursor.execute("SELECT precio FROM Productos WHERE id_producto = ?", (producto_id,))
@@ -614,7 +619,7 @@ def editar_factura(id_venta):
                 subtotal = precio_unitario * cantidad
 
                 try:
-                    # Actualizar la venta principal (solo descuento)
+                    
                     cursor.execute(''' 
                         UPDATE Ventas
                         SET Descuento = ?
@@ -657,7 +662,6 @@ def editar_factura(id_venta):
     except Exception as e:
         print(f"Error al editar la factura: {e}")
         return f"Error al editar la factura: {e}", 500
-
 
 @app.route('/buscar_productos', methods=['GET'])
 def buscar_productos():
@@ -750,9 +754,23 @@ def buscar_vendedor():
     
 app.register_blueprint(clientes_bp, url_prefix='/cliente') 
 
-app.register_blueprint(inventario_bp, url_prefix='/inventario') 
+app.register_blueprint(inventario_bp, url_prefix='/inventario')
 
 app.register_blueprint(vendedores_bp, url_prefix='/vendedor') 
+
+app.register_blueprint(reportes_bp, url_prefix='/reportes') 
+
+app.register_blueprint(reportes_descuento_bp, url_prefix='/reportes_descuento') 
+
+app.register_blueprint(reportes_iva_bp, url_prefix='/reportes_iva') 
+
+app.register_blueprint(reporte_ventas_producto_bp, url_prefix='/reporte_ventas_producto')
+
+app.register_blueprint(reporte_ventas_vendedor_bp, url_prefix='/reporte_ventas_vendedor')
+
+app.register_blueprint(reporte_rango_fecha_bp, url_prefix='/reporte_rango_fecha')
+
+app.register_blueprint(reporte_punto_reorden_bp, url_prefix='/reporte_punto_reorden')
 
 
 if __name__ == "__main__":
